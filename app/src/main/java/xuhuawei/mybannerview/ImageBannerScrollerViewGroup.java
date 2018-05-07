@@ -172,8 +172,13 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
         return true;
     }
 
+    /**
+     * mScroller.getCurrX() 是滚动即将滑动到的距离
+     * Scroller仅仅是一个计算的类 并不负责视图
+     *
+     */
     @Override
-    public void computeScroll() {
+    public void computeScroll() {//computeScroll->invalide ->onDrawable->computeScroll->invalide
         super.computeScroll();
         if (mScroller.computeScrollOffset()){
             scrollTo(mScroller.getCurrX(),0);
