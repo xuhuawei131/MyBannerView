@@ -5,13 +5,14 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Scroller;
 
 /**
  * Created by Administrator on 2018/5/5 0005.
  * 我们自定义ViewGroup布局的时候
  * 必须要实现的方法：测量-》布局-》绘制
  */
-public class ImageBannerViewGroup extends ViewGroup {
+public class ImageBannerScrollerViewGroup extends ViewGroup {
 
     private int lastX;
     private int lastY;
@@ -23,23 +24,25 @@ public class ImageBannerViewGroup extends ViewGroup {
 
     private int index;
 
-    public ImageBannerViewGroup(Context context) {
+
+    private Scroller mScroller;
+    public ImageBannerScrollerViewGroup(Context context) {
         super(context);
         init(null);
     }
 
-    public ImageBannerViewGroup(Context context, AttributeSet attrs) {
+    public ImageBannerScrollerViewGroup(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs);
     }
 
-    public ImageBannerViewGroup(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ImageBannerScrollerViewGroup(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(attrs);
     }
 
     private void init(AttributeSet attrs) {
-
+        mScroller=new Scroller(getContext());
     }
 
     /**
@@ -97,19 +100,19 @@ public class ImageBannerViewGroup extends ViewGroup {
             case MotionEvent.ACTION_DOWN:
                 break;
             case MotionEvent.ACTION_MOVE:
-                int delatX = x - lastX;
-                int delatY = y - lastY;
-                if (Math.abs(delatX) > Math.abs(delatY)) {
-                    isIntercept = true;
-                } else {
-                    isIntercept = false;
+                int delatX=x-lastX;
+                int delatY=y-lastY;
+                if (Math.abs(delatX)>Math.abs(delatY)){
+                    isIntercept=true;
+                }else{
+                    isIntercept=false;
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
             case MotionEvent.ACTION_UP:
-                lastX = x;
-                lastY = y;
+                lastX=x;
+                lastY=y;
                 break;
         }
         return true;
@@ -119,16 +122,17 @@ public class ImageBannerViewGroup extends ViewGroup {
      * 两种方式实现我们的手动轮播
      * 1、利用scrollTo scrollBy 完成轮播
      * 2、利用Scroller 对象 完成轮播
-     * <p>
-     * 第一、
-     * 我们在完成滑动屏幕图片的过程中 其实就是我们自定义ViewGroup的在子视图的移动过程
-     * 那么我们只需要知道滑动之前的横坐标和滑动之后的横坐标  此时我们就可以 求出我们过程中的距离
-     * 我们再利用scrollBy方法实现图片的滚动  所以我们需要2个值 移动之前和移动之后横坐标
-     * <p>
-     * 第二、
-     * 在我们第一次按下的那一瞬间，此时的移动之前和移动之后的值是相等的，也就是 我们此时按下那一瞬间 的那一个点的横坐标
-     * 第三、
-     * 我们在不断的滑动过程中
+     *
+     *  第一、
+     *  我们在完成滑动屏幕图片的过程中 其实就是我们自定义ViewGroup的在子视图的移动过程
+     *  那么我们只需要知道滑动之前的横坐标和滑动之后的横坐标  此时我们就可以 求出我们过程中的距离
+     *  我们再利用scrollBy方法实现图片的滚动  所以我们需要2个值 移动之前和移动之后横坐标
+     *
+     *  第二、
+     *  在我们第一次按下的那一瞬间，此时的移动之前和移动之后的值是相等的，也就是 我们此时按下那一瞬间 的那一个点的横坐标
+     *  第三、
+     *  我们在不断的滑动过程中
+     *
      *
      * @param ev
      * @return
@@ -137,28 +141,43 @@ public class ImageBannerViewGroup extends ViewGroup {
     public boolean onTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                x = (int) ev.getX();
+                x= (int) ev.getX();
+                if (!mScroller.isFinished()){
+                    mScroller.abortAnimation();
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                int moveX = (int) ev.getX();
-                int distance = moveX - x;
-                scrollBy(-distance, 0);
-                x = moveX;
+                int moveX= (int) ev.getX();
+                int distance=moveX-x;
+                scrollBy(-distance,0);
+                x=moveX;
                 break;
             case MotionEvent.ACTION_CANCEL:
                 break;
             case MotionEvent.ACTION_UP:
-                int scrollX = getScrollX();
-                index = (scrollX + subWidth / 2) / subWidth;
-                if (index < 0) {//此时已经滑动到了最左边
-                    index = 0;
-                } else if (index > (getChildCount() - 1)) {//此时已经超过了最右边一张图
-                    index = getChildCount() - 1;
+                int scrollX=getScrollX();
+                index=(scrollX+subWidth/2)/subWidth;
+                if (index<0){//此时已经滑动到了最左边
+                    index=0;
+                }else if(index>(getChildCount()-1)){//此时已经超过了最右边一张图
+                    index=getChildCount()-1;
                 }
-                scrollTo(index * subWidth, 0);
+//                scrollTo(index*subWidth,0);
 
+                int dx=index*subWidth-scrollX;
+                mScroller.startScroll(scrollX,0,dx,0);
+                postInvalidate();
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (mScroller.computeScrollOffset()){
+            scrollTo(mScroller.getCurrX(),0);
+            invalidate();
+        }
     }
 }
