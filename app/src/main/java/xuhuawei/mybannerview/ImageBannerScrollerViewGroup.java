@@ -93,6 +93,8 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
         int y = (int) ev.getY();
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                lastX = x;
+                lastY = y;
                 getParent().requestDisallowInterceptTouchEvent(true);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -112,37 +114,37 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
         return super.dispatchTouchEvent(ev);
     }
 
-    /**
-     * @param ev
-     * @return 如果返回为true  那么我们的viewgroup就会处理拦截事件 如果为false 那么我们的viewgroup将不会接受这个事件处理
-     */
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean isIntercept = false;
-        int x = (int) ev.getX();
-        int y = (int) ev.getY();
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                break;
-            case MotionEvent.ACTION_MOVE:
-                int delatX=x-lastX;
-                int delatY=y-lastY;
-                if (Math.abs(delatX)>Math.abs(delatY)){
-                    isIntercept=true;
-                }else{
-                    isIntercept=false;
-                }
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                break;
-            case MotionEvent.ACTION_UP:
-                lastX=x;
-                lastY=y;
-                isIntercept=false;
-                break;
-        }
-        return isIntercept;
-    }
+//    /**
+//     * @param ev
+//     * @return 如果返回为true  那么我们的viewgroup就会处理拦截事件 如果为false 那么我们的viewgroup将不会接受这个事件处理
+//     */
+//    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        boolean isIntercept = false;
+//        int x = (int) ev.getX();
+//        int y = (int) ev.getY();
+//        switch (ev.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                int delatX=x-lastX;
+//                int delatY=y-lastY;
+//                if (Math.abs(delatX)>Math.abs(delatY)){
+//                    isIntercept=true;
+//                }else{
+//                    isIntercept=false;
+//                }
+//                break;
+//            case MotionEvent.ACTION_CANCEL:
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                lastX=x;
+//                lastY=y;
+//                isIntercept=false;
+//                break;
+//        }
+//        return isIntercept;
+//    }
 
     /**
      * 两种方式实现我们的手动轮播
