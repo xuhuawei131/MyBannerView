@@ -83,7 +83,30 @@ public class ImageBannerViewGroup extends ViewGroup {
             }
         }
     }
-
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        int x = (int) ev.getX();
+        int y = (int) ev.getY();
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int delatX=x-lastX;
+                int delatY=y-lastY;
+                if (Math.abs(delatX)<Math.abs(delatY)){
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                break;
+            case MotionEvent.ACTION_UP:
+                lastX=x;
+                lastY=y;
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
     /**
      * @param ev
      * @return 如果返回为true  那么我们的viewgroup就会处理拦截事件 如果为false 那么我们的viewgroup将不会接受这个事件处理
@@ -95,6 +118,7 @@ public class ImageBannerViewGroup extends ViewGroup {
         int y = (int) ev.getY();
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+
                 break;
             case MotionEvent.ACTION_MOVE:
                 int delatX = x - lastX;
@@ -112,7 +136,7 @@ public class ImageBannerViewGroup extends ViewGroup {
                 lastY = y;
                 break;
         }
-        return true;
+        return isIntercept;
     }
 
     /**

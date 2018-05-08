@@ -87,6 +87,31 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
         }
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        int x = (int) ev.getX();
+        int y = (int) ev.getY();
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                int delatX=x-lastX;
+                int delatY=y-lastY;
+                if (Math.abs(delatX)<Math.abs(delatY)){
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                break;
+            case MotionEvent.ACTION_UP:
+                lastX=x;
+                lastY=y;
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     /**
      * @param ev
      * @return 如果返回为true  那么我们的viewgroup就会处理拦截事件 如果为false 那么我们的viewgroup将不会接受这个事件处理
@@ -113,9 +138,10 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
             case MotionEvent.ACTION_UP:
                 lastX=x;
                 lastY=y;
+                isIntercept=false;
                 break;
         }
-        return true;
+        return isIntercept;
     }
 
     /**
@@ -139,8 +165,10 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
      */
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+
                 x= (int) ev.getX();
                 if (!mScroller.isFinished()){
                     mScroller.abortAnimation();
@@ -153,8 +181,10 @@ public class ImageBannerScrollerViewGroup extends ViewGroup {
                 x=moveX;
                 break;
             case MotionEvent.ACTION_CANCEL:
+
                 break;
             case MotionEvent.ACTION_UP:
+                this.getParent().requestDisallowInterceptTouchEvent(false);
                 int scrollX=getScrollX();
                 index=(scrollX+subWidth/2)/subWidth;
                 if (index<0){//此时已经滑动到了最左边
